@@ -1,0 +1,39 @@
+.profile {
+    text-align: center;
+    margin-top: 50px;
+  }
+  
+  form {
+    display: inline-block;
+    text-align: left;
+  }
+  
+  label {
+    display: block;
+    margin: 10px 0;
+  }
+  
+  .buttons {
+    margin-top: 20px;
+  }
+  
+  button {
+    margin: 0 5px;
+    padding: 10px 15px;
+  }
+  
+  .btn-save {
+    background-color: green;
+    color: white;
+  }
+  
+  .btn-cancel {
+    background-color: orange;
+    color: white;
+  }
+  
+  .btn-delete {
+    background-color: red;
+    color: white;
+  }
+  

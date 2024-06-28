@@ -1,2 +1,2 @@
 # DeliveryApp
-delivery app project using react
+delivery app project

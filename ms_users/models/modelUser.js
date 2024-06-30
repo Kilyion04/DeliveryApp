@@ -1,5 +1,7 @@
+// models/modelUser.js
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/config');
+const Address = require('./modelAddress');
 
 const User = sequelize.define('user', {
   user_id: {
@@ -36,12 +38,20 @@ const User = sequelize.define('user', {
   telephone: {
     type: DataTypes.STRING
   },
-  address: {
-    type: DataTypes.STRING
+  address_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'addresses',
+      key: 'address_id'
+    }
   }
 }, {
   tableName: 'users',
   timestamps: false
 });
+
+User.associate = (models) => {
+  User.belongsTo(models.Address, { foreignKey: 'address_id' });
+};
 
 module.exports = User;

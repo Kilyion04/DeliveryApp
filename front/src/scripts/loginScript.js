@@ -1,17 +1,27 @@
 import { login } from '../handlers/loginHandler';
+import { useNavigate } from 'react-router-dom';
 
-export const handleLogin = async (event) => {
-  event.preventDefault();
-  const form = event.target;
-  const userData = {
-    email: form.email.value,
-    password: form.password.value,
-  };
-  try {
-    await login(userData);
-    alert('Login successful');
-    window.location.href = '/cli/dashboard'; // Redirection vers le tableau de bord du client
-  } catch (error) {
-    alert(error.message);
-  }
+const handleLogin = async (event, navigate) => {
+    event.preventDefault();
+    const form = event.target;
+    const userData = {
+        email: form.email.value,
+        password: form.password.value,
+    };
+
+    try {
+        const user = await login(userData);
+        alert('Login successful');
+        if (user.role === 'client') {
+            navigate('/cli/dashboard');
+        } else if (user.role === 'deliverer') {
+            navigate('/deliv/dashboard');
+        } else if (user.role === 'restaurateur') {
+            navigate('/rest/dashboard');
+        }
+    } catch (error) {
+        alert(error.message);
+    }
 };
+
+export default handleLogin;

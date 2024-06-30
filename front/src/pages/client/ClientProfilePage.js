@@ -10,6 +10,7 @@ import {
 } from '../../scripts/profileScripts';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt } from '@fortawesome/free-solid-svg-icons';
+import AddressAutocomplete from '../../components/autocompleteAdress';
 
 const ClientProfilePage = () => {
   const [userData, setUserData] = useState({
@@ -86,11 +87,18 @@ const ClientProfilePage = () => {
             <div key={field} className="profile-field">
               <label>{field.charAt(0).toUpperCase() + field.slice(1)}:</label>
               {editMode[field] ? (
-                <input
-                  type="text"
-                  value={userData[field]}
-                  onChange={(e) => setUserData({ ...userData, [field]: e.target.value })}
-                />
+                field === 'address' ? (
+                  <AddressAutocomplete
+                    value={userData.address}
+                    onChange={(value) => setUserData({ ...userData, address: value })}
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={userData[field]}
+                    onChange={(e) => setUserData({ ...userData, [field]: e.target.value })}
+                  />
+                )
               ) : (
                 <span>{userData[field]}</span>
               )}

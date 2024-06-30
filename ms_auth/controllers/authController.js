@@ -2,50 +2,98 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
 
-const API_GATEWAY_URL = process.env.API_GATEWAY_URL;
-
 const register = async (req, res) => {
-  const { username, email, password, role } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const refreshToken = jwt.sign({ email }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
-
   try {
-    const userResponse = await axios.post(`${API_GATEWAY_URL}/ms_users`, { username, email, password: hashedPassword, role, refreshToken });
-    res.status(201).json({ message: 'User created successfully', user: userResponse.data });
+    const {
+      username,
+      email,
+      password,
+      role,
+      telephone,
+      address_num,
+      address_complement,
+      address_street,
+      address_neighbor,
+      address_city,
+      address_postal_code,
+      address_departement,
+      address_region,
+      address_country
+    } = req.body;
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user in ms_users
+    const response = await axios.post(`${process.env.API_GATEWAY_URL}/ms_users`, {
+      username,
+      email,
+      password: hashedPassword,
+      role,
+      telephone,
+      address_num,
+      address_complement,
+      address_street,
+      address_neighbor,
+      address_city,
+      address_postal_code,
+      address_departement,
+      address_region,
+      address_country
+    });
+
+    const user = response.data;
+
+    // Generate refresh token
+    const refreshToken = jwt.sign({ id: user.user_id }, process.env.REFRESH_TOKEN_SECRET, {
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRATION
+    });
+
+    // Update user with refresh token
+    await axios.put(`${process.env.API_GATEWAY_URL}/ms_users/${user.user_id}`, {
+      refresh_token: refreshToken
+    });
+
+    res.status(201).json({ user, refreshToken });
   } catch (error) {
-    console.error('Error creating user:', error);
-    res.status(500).json({ message: 'Error creating user', error: error.response ? error.response.data : error.message });
+    console.error('Error during registration:', error);
+    res.status(500).json({ error: 'Registration failed', details: error.message });
   }
 };
 
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const userResponse = await axios.get(`${API_GATEWAY_URL}/ms_users/email/${email}`);
-    const user = userResponse.data;
+    // Récupérer l'utilisateur à partir du microservice users
+    const response = await axios.get(`${process.env.API_GATEWAY_URL}/ms_users`, {
+      params: { email }
+    });
 
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid email or password' });
+    const user = response.data[0];
+    console.log("User data: ", user);
+
+    if (!user || !user.password) {
+      return res.status(401).json({ error: 'Authentication failed' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid email or password' });
+    // Comparer les mots de passe
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Authentication failed' });
     }
 
-    const accessToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRATION });
-    const refreshToken = jwt.sign({ email }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
+    // Générer un token JWT
+    const accessToken = jwt.sign(
+      { user_id: user.user_id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
 
-    await axios.put(`${API_GATEWAY_URL}/ms_users/${user.user_id}/refresh_token`, { refreshToken });
-
-    res.status(200).json({ accessToken, refreshToken, user });
+    return res.status(200).json({ accessToken, user });
   } catch (error) {
-    res.status(500).json({ message: 'Error logging in', error: error.response ? error.response.data : error.message });
+    console.error('Error during login:', error);
+    return res.status(500).json({ error: 'An error occurred during login', details: error.message });
   }
 };
 
-module.exports = {
-  register,
-  login,
-};
+module.exports = { register, login };

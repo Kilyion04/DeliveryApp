@@ -1,6 +1,9 @@
+// index.js
 const express = require('express');
 const bodyParser = require('body-parser');
 const { connectDB } = require('./config/config');
+const User = require('./models/modelUser');
+const Address = require('./models/modelAddress');
 
 const app = express();
 const port = process.env.PORT || 3007;
@@ -20,9 +23,12 @@ app.use((req, res, next) => {
 // Connect to PostgreSQL
 connectDB();
 
+// Initialize models and associations
+User.associate({ Address });
+Address.associate({ User });
+
 // Routes
 app.use('/ms_users', require('./routes/user'));
-
 
 // Error handling middleware
 app.use((err, req, res, next) => {

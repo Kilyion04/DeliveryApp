@@ -1,8 +1,37 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import '../../style/client/dashboard.css';
 
 const ClientDashboard = () => {
+  const [user, setUser] = useState(null);
+  const [restaurants, setRestaurants] = useState([]);
+
+  useEffect(() => {
+    const userData = {
+      user_id: localStorage.getItem('user_id'),
+      username: localStorage.getItem('username'),
+      email: localStorage.getItem('email'),
+      role: localStorage.getItem('role'),
+      telephone: localStorage.getItem('telephone'),
+      address: localStorage.getItem('address'),
+      city: localStorage.getItem('city'), // Assurez-vous que 'city' est récupéré
+    };
+    setUser(userData);
+  }, []);
+
+  useEffect(() => {
+    if (user && user.city) {
+      axios.get(`http://localhost:3006/ms_rests/city/${user.city}`)
+        .then(response => setRestaurants(response.data))
+        .catch(error => console.error('Error fetching restaurants:', error));
+    }
+  }, [user]);
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
@@ -12,17 +41,18 @@ const ClientDashboard = () => {
         <div className="left-panel">
           <h2>Restaurants aux alentours</h2>
           <ul>
-            <li><Link to="/client/restaurant/1">Restaurant 1</Link></li>
-            <li><Link to="/client/restaurant/2">Restaurant 2</Link></li>
-            <li><Link to="/client/restaurant/3">Restaurant 3</Link></li>
-            {/* Ajoutez plus de restaurants ici */}
+            {restaurants.map((restaurant) => (
+              <li key={restaurant.restaurant_id}>
+                <Link to={`/client/restaurant/${restaurant.restaurant_id}`}>{restaurant.name}</Link>
+              </li>
+            ))}
           </ul>
         </div>
         <div className="right-panel">
           <div className="profile-section">
             <h2>Profil</h2>
-            <p>Nom: John Doe</p>
-            <p>Email: john.doe@example.com</p>
+            <p>Nom: {user.username}</p>
+            <p>Email: {user.email}</p>
             <Link to="/cli/profile">Voir le profil</Link>
           </div>
           <div className="recent-orders">

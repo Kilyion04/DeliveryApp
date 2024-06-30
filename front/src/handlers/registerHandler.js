@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3010/ms_api/ms_auth';
+const API_URL = 'http://localhost:3010/api/ms_auth';
 
 export const register = async (userData) => {
   try {
@@ -8,7 +8,7 @@ export const register = async (userData) => {
     return response.data;
   } catch (error) {
     if (error.response && error.response.data) {
-      throw error.response.data;
+      throw new Error(error.response.data);
     } else {
       throw new Error('An error occurred while registering');
     }

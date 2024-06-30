@@ -10,6 +10,18 @@ app.use(bodyParser.json());
 // Connect to PostgreSQL
 connectDB();
 
+const { sequelize } = require('./config/config');
+const Restaurant = require('./models/modelRestaurant');
+
+sequelize.sync({ alter: true })
+  .then(() => {
+    console.log('Database & tables updated!');
+  })
+  .catch((err) => {
+    console.error('Failed to update database & tables:', err);
+  });
+
+
 // Routes
 app.use('/ms_rests', require('./routes/rest'));
 

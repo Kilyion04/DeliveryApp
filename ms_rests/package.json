@@ -1,8 +1,15 @@
 {
+  "name": "ms_rests",
+  "version": "1.0.0",
+  "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js"
-  },
+  },  
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
   "dependencies": {
     "addressit": "^1.8.2",
     "dotenv": "^16.4.5",

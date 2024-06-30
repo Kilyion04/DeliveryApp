@@ -1,19 +1,21 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import handleLogin from '../../scripts/loginScript';
 import '../../style/connection/login.css';
-import { handleLogin } from '../../scripts/loginScript';
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="login-container">
-      <h1>Login</h1>
-      <form className="login-form" onSubmit={handleLogin}>
+      <h1>Se connecter</h1>
+      <form className="login-form" onSubmit={(e) => handleLogin(e, navigate)}>
         <div className="form-group">
           <label>Email</label>
           <input type="email" name="email" required />
         </div>
         <div className="form-group">
-          <label>Password</label>
+          <label>Mot de passe</label>
           <input type="password" name="password" required />
         </div>
         <button type="submit" className="login-button">Se connecter</button>

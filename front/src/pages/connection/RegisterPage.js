@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import '../../style/connection/register.css';
 import { handleRegister } from '../../scripts/registerScript';
+import '../../style/connection/register.css';
 
 const RegisterPage = () => {
   return (
@@ -17,16 +17,56 @@ const RegisterPage = () => {
           <input type="email" name="email" required />
         </div>
         <div className="form-group">
+          <label>Téléphone</label>
+          <input type="text" name="telephone" required />
+        </div>
+        <div className="form-group">
           <label>Mot de passe</label>
           <input type="password" name="password" required />
         </div>
         <div className="form-group">
           <label>Rôle</label>
           <select name="role" required>
-            <option value="client">Client</option>
-            <option value="livreur">Livreur</option>
-            <option value="restaurateur">Restaurateur</option>
+            <option value="Client">Client</option>
+            <option value="Livreur">Livreur</option>
+            <option value="Restaurateur">Restaurateur</option>
           </select>
+        </div>
+        <div className="form-group">
+          <label>Numéro de rue</label>
+          <input type="text" name="address_num" required />
+        </div>
+        <div className="form-group">
+          <label>Complément d'adresse</label>
+          <input type="text" name="address_complement" />
+        </div>
+        <div className="form-group">
+          <label>Rue</label>
+          <input type="text" name="address_street" required />
+        </div>
+        <div className="form-group">
+          <label>Quartier</label>
+          <input type="text" name="address_neighbor" />
+        </div>
+        <div className="form-group">
+          <label>Ville</label>
+          <input type="text" name="address_city" required />
+        </div>
+        <div className="form-group">
+          <label>Code postal</label>
+          <input type="text" name="address_postal_code" required />
+        </div>
+        <div className="form-group">
+          <label>Département</label>
+          <input type="text" name="address_departement" required />
+        </div>
+        <div className="form-group">
+          <label>Région</label>
+          <input type="text" name="address_region" required />
+        </div>
+        <div className="form-group">
+          <label>Pays</label>
+          <input type="text" name="address_country" required />
         </div>
         <button type="submit" className="register-button">Créer un compte</button>
       </form>

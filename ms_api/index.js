@@ -1,22 +1,18 @@
 require('dotenv').config();
 const express = require('express');
-const proxy = require('express-http-proxy');
+const cors = require('cors');
+const setupProxies = require('./proxyMiddleware');
 
 const app = express();
-const port = process.env.PORT || 3000;
-
-const services = {
-  '/api/ms_users': process.env.USERS_SERVICE_URL,
-  '/api/ms_rests': process.env.RESTAURANTS_SERVICE_URL,
-  '/api/ms_articles': process.env.ARTICLES_SERVICE_URL,
-  '/api/ms_notifs': process.env.NOTIFICATIONS_SERVICE_URL,
-  '/api/ms_logs': process.env.LOGS_SERVICE_URL,
-  '/api/ms_menus': process.env.MENUS_SERVICE_URL,
-  '/api/ms_orders': process.env.ORDERS_SERVICE_URL,
-};
+const port = process.env.PORT || 3010;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+  origin: 'http://localhost:3000', // Allow requests from your frontend's URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Middleware de journalisation
 app.use((req, res, next) => {
@@ -25,20 +21,7 @@ app.use((req, res, next) => {
 });
 
 // Configurer les proxies pour chaque microservice
-Object.keys(services).forEach((context) => {
-  const serviceUrl = services[context];
-  app.use(context, proxy(serviceUrl, {
-    proxyReqPathResolver: (req) => {
-      const url = context.replace('/api', '') + req.url;
-      console.log(`Proxying request to: ${serviceUrl}${url}`); // Log de l'URL proxy
-      return url;
-    },
-    userResDecorator: (proxyRes, proxyResData, userReq, userRes) => {
-      console.log(`Response from proxied request to: ${serviceUrl}${userReq.url}`);
-      return proxyResData;
-    }
-  }));
-});
+setupProxies(app);
 
 // Middleware de gestion des erreurs
 app.use((err, req, res, next) => {

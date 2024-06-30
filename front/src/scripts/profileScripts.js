@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const fetchUserData = () => {
   return {
-    id: localStorage.getItem('id_user'),
+    id: localStorage.getItem('user_id'), // Assurez-vous que 'user_id' est correct
     username: localStorage.getItem('username'),
     email: localStorage.getItem('email'),
     address: localStorage.getItem('address'),
@@ -13,7 +13,7 @@ export const fetchUserData = () => {
 export const saveUserData = async (userData) => {
   try {
     const token = localStorage.getItem('accessToken');
-    const response = await axios.put(`http://localhost:3010/ms_api/ms_users/${userData.id}`, userData, {
+    const response = await axios.put(`http://localhost:3010/api/ms_users/${userData.id}`, userData, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -36,8 +36,8 @@ export const logout = () => {
 export const deleteUserAccount = async (password) => {
   try {
     const token = localStorage.getItem('accessToken');
-    const userId = localStorage.getItem('id_user');
-    await axios.delete(`http://localhost:3010/ms_api/ms_users/${userId}`, {
+    const userId = localStorage.getItem('user_id'); // Assurez-vous que 'user_id' est correct
+    await axios.delete(`http://localhost:3010/api/ms_users/${userId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -53,9 +53,9 @@ export const deleteUserAccount = async (password) => {
 export const changeUserPassword = async (oldPassword, newPassword) => {
   try {
     const token = localStorage.getItem('accessToken');
-    const userId = localStorage.getItem('id_user');
+    const userId = localStorage.getItem('user_id'); // Assurez-vous que 'user_id' est correct
     await axios.put(
-      `http://localhost:3010/ms_api/ms_users/${userId}`,
+      `http://localhost:3010/api/ms_users/${userId}`,
       {
         password: newPassword,
       },

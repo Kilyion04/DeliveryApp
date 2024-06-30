@@ -1,57 +1,69 @@
 const Restaurant = require('../models/modelRestaurant');
-
-exports.getAllRestaurants = async (req, res) => {
-  try {
-    const restaurants = await Restaurant.findAll();
-    res.json(restaurants);
-  } catch (err) {
-    res.status(500).send(err);
-  }
-};
-
-exports.getRestaurantById = async (req, res) => {
-  try {
-    const restaurant = await Restaurant.findOne({ where: { restaurant_id: req.params.id } });
-    if (!restaurant) {
-      return res.status(404).send({ message: 'Restaurant not found' });
-    }
-    res.json(restaurant);
-  } catch (err) {
-    res.status(500).send(err);
-  }
-};
+const Address = require('../models/modelAddress');
+const { sequelize } = require('../config/config');
 
 exports.createRestaurant = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
-    console.log('Creating restaurant with data:', req.body);
-    const restaurant = await Restaurant.create(req.body);
-    res.status(201).json(restaurant);
+    const {
+      user_id,
+      name,
+      description,
+      phone,
+      email,
+      address_num,
+      address_complement,
+      address_street,
+      address_neighbor,
+      address_city,
+      address_postal_code,
+      address_departement,
+      address_region,
+      address_country
+    } = req.body;
+
+    // Create address
+    const address = await Address.create({
+      address_num,
+      address_complement,
+      address_street,
+      address_neighbor,
+      address_city,
+      address_postal_code,
+      address_departement,
+      address_region,
+      address_country
+    }, { transaction });
+
+    // Create restaurant
+    const restaurant = await Restaurant.create({
+      user_id,
+      name,
+      description,
+      phone,
+      email,
+      address_id: address.address_id
+    }, { transaction });
+
+    await transaction.commit();
+    res.status(201).json({ restaurant, address });
   } catch (err) {
-    console.error('Error creating restaurant:', err);
-    res.status(400).send(err);
+    await transaction.rollback();
+    res.status(500).send(err);
   }
 };
 
-exports.updateRestaurant = async (req, res) => {
+exports.getRestaurantsByUser = async (req, res) => {
   try {
-    const [updated] = await Restaurant.update(req.body, { where: { restaurant_id: req.params.id } });
-    if (!updated) {
-      return res.status(404).send({ message: 'Restaurant not found' });
+    const userId = req.params.user_id;
+    const restaurants = await Restaurant.findAll({
+      where: { user_id: userId },
+      include: Address
+    });
+    if (!restaurants.length) {
+      return res.status(404).send({ message: 'No restaurants found for this user' });
     }
-    const updatedRestaurant = await Restaurant.findOne({ where: { restaurant_id: req.params.id } });
-    res.json(updatedRestaurant);
-  } catch (err) {
-    res.status(400).send(err);
-  }
-};
-
-exports.softDeleteRestaurant = async (req, res) => {
-  try {
-    const [updated] = await Restaurant.update({ description: 'inactive' }, { where: { restaurant_id: req.params.id } });
-    if (!updated) {
-      return res.status(404).send({ message: 'Restaurant not found or already inactive' });
-    }
-    res.send({ message: 'Restaurant soft deleted' });
+    res.json(restaurants);
   } catch (err) {
     res.status(500).send(err);
   }

@@ -12,6 +12,7 @@
   "description": "",
   "dependencies": {
     "addressit": "^1.8.2",
+    "axios": "^1.7.2",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "node-postal": "^1.2.0",

@@ -1,0 +1,94 @@
+/* General Styles */
+.restaurant-page-container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.content-section {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.menus-section, .articles-section, .cart-section {
+  flex: 1;
+  margin: 10px;
+}
+
+h1, h2, h3 {
+  color: #333;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  border-bottom: 1px solid #ddd;
+  padding: 10px 0;
+}
+
+/* Button Styles */
+button {
+  background-color: #ff8c00;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #e07b00;
+}
+
+/* Cart Section Styles */
+.cart-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.cart-section li {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.cart-section li p {
+  margin: 0;
+}
+
+.cart-section button {
+  background: none;
+  border: none;
+  color: red;
+  cursor: pointer;
+}
+
+.cart-section .clear-cart-button {
+  background-color: #ff8c00;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.cart-section .clear-cart-button:hover {
+  background-color: #e07b00;
+}
+
+.clear-cart-button, .place-order-button {
+  margin-top: 10px;
+}
+
+.place-order-button {
+  background-color: #28a745;
+}
+
+.place-order-button:hover {
+  background-color: #218838;
+}

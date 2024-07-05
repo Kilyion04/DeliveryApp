@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 connectDB();
 
 // Routes
-app.use('/ms_orders', require('./routes/order'));
+app.use('/api/ms_orders', require('./routes/order'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

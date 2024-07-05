@@ -1,13 +1,14 @@
-// routes/user.js
 const express = require('express');
 const router = express.Router();
-const UserController = require('../controllers/userController');
+const userController = require('../controllers/userController');
 
-router.get('/', UserController.getAllUsers);
-router.get('/:id', UserController.getUserById);
-router.post('/', UserController.createUser);
-router.put('/:id', UserController.updateUser);
-router.get('/email', UserController.getUserByEmail);
-router.delete('/:id', UserController.softDeleteUser);
+// Define routes and associate them with controller methods
+router.get('/', userController.getAllUsers);
+router.get('/:id', userController.getUserById);
+router.post('/', userController.createUser);
+router.put('/:id', userController.updateUser);
+router.delete('/:id', userController.softDeleteUser);
+router.get('/email/:email', userController.getUserByEmail);
+router.put('/:id/status', userController.updateUserStatus);
 
 module.exports = router;

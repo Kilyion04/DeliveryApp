@@ -1,3 +1,4 @@
+const axios = require('axios');
 const Menu = require('../models/modelMenu');
 
 exports.getAllMenus = async (req, res) => {
@@ -23,17 +24,50 @@ exports.getMenuById = async (req, res) => {
 
 exports.createMenu = async (req, res) => {
   try {
-    const menu = new Menu(req.body);
+    const { menu_name, menu_description, article_list, restaurant_id } = req.body;
+
+    const articlePromises = article_list.map(id => axios.get(`http://localhost:3010/api/ms_articles/${id}`));
+    const articleResponses = await Promise.all(articlePromises);
+    const articles = articleResponses.map(response => response.data);
+
+    const totalPrice = articles.reduce((total, article) => total + article.article_price, 0) * 0.8;
+
+    const menu = new Menu({
+      restaurant_id,
+      menu_name,
+      menu_description,
+      menu_price: totalPrice,
+      article_list
+    });
+
     await menu.save();
     res.status(201).json(menu);
   } catch (err) {
-    res.status(400).send(err);
+    console.error('Error creating menu:', err);
+    res.status(500).send(err);
   }
 };
 
 exports.updateMenu = async (req, res) => {
   try {
-    const menu = await Menu.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const { menu_name, menu_description, article_list } = req.body;
+
+    // Fetch articles details from ms_articles service
+    const articlePromises = article_list.map(id => axios.get(`http://localhost:3010/api/ms_articles/${id}`));
+    const articleResponses = await Promise.all(articlePromises);
+    const articles = articleResponses.map(response => response.data);
+
+    // Calculate total price (sum of articles' prices * 0.8)
+    const totalPrice = articles.reduce((total, article) => total + article.article_price, 0) * 0.8;
+
+    const updatedMenu = {
+      menu_name,
+      menu_description,
+      menu_price: totalPrice,
+      article_list
+    };
+
+    const menu = await Menu.findByIdAndUpdate(req.params.id, updatedMenu, { new: true, runValidators: true });
     if (!menu) {
       return res.status(404).send({ message: 'Menu not found' });
     }

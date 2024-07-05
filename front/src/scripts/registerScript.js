@@ -10,16 +10,16 @@ export const handleRegister = async (event) => {
     telephone: form.telephone.value,
     password: form.password.value,
     role: form.role.value,
-    address_num: form.address_num.value,
-    address_complement: form.address_complement.value,
-    address_street: form.address_street.value,
-    address_neighbor: form.address_neighbor.value,
-    address_city: form.address_city.value,
-    address_postal_code: form.address_postal_code.value,
-    address_departement: form.address_departement.value,
-    address_region: form.address_region.value,
-    address_country: form.address_country.value,
+    address: form.address.value,
+    createRestaurant: form.createRestaurant ? form.createRestaurant.checked : false,
+    restaurantName: form.restaurantName ? form.restaurantName.value : '',
+    restaurantDescription: form.restaurantDescription ? form.restaurantDescription.value : '',
+    restaurantPhone: form.restaurantPhone ? form.restaurantPhone.value : '',
+    restaurantEmail: form.restaurantEmail ? form.restaurantEmail.value : '',
+    restaurantAddress: form.restaurantAddress ? form.restaurantAddress.value : '',
   };
+
+  console.log('Sending register data:', userData); 
   try {
     const response = await register(userData);
     alert('Registration successful');

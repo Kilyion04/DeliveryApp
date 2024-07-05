@@ -15,7 +15,7 @@ export const login = async (userData) => {
         localStorage.setItem('telephone', user.telephone);
         localStorage.setItem('address', user.address);
 
-        return response.data.user;
+        return user;
     } catch (error) {
         if (error.response && error.response.data) {
             throw new Error(error.response.data.error);

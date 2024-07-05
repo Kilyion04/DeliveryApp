@@ -1,88 +1,100 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const axios = require('axios');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const register = async (req, res) => {
   try {
-    const {
-      username,
-      email,
-      password,
-      role,
-      telephone,
-      address_num,
-      address_complement,
-      address_street,
-      address_neighbor,
-      address_city,
-      address_postal_code,
-      address_departement,
-      address_region,
-      address_country
-    } = req.body;
+    const { username, email, password, role, telephone, address, createRestaurant, restaurantName, restaurantDescription, restaurantPhone, restaurantEmail, restaurantAddress } = req.body;
 
-    // Hash the password
+    if (!address) {
+      return res.status(400).json({ error: 'Address is required' });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user in ms_users
-    const response = await axios.post(`${process.env.API_GATEWAY_URL}/ms_users`, {
+    const refreshToken = jwt.sign(
+      { email },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    // Create user
+    const userResponse = await axios.post(`${process.env.API_GATEWAY_URL}/ms_users`, {
       username,
       email,
       password: hashedPassword,
       role,
       telephone,
-      address_num,
-      address_complement,
-      address_street,
-      address_neighbor,
-      address_city,
-      address_postal_code,
-      address_departement,
-      address_region,
-      address_country
-    });
-
-    const user = response.data;
-
-    // Generate refresh token
-    const refreshToken = jwt.sign({ id: user.user_id }, process.env.REFRESH_TOKEN_SECRET, {
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRATION
-    });
-
-    // Update user with refresh token
-    await axios.put(`${process.env.API_GATEWAY_URL}/ms_users/${user.user_id}`, {
+      address,
       refresh_token: refreshToken
     });
 
-    res.status(201).json({ user, refreshToken });
+    const userId = userResponse.data.user_id;
+    console.log(`User created with ID: ${userId}`);
+
+    if (!userId) {
+      console.error('Failed to create user, user ID is undefined');
+      return res.status(500).json({ error: 'Failed to create user' });
+    }
+
+    if (createRestaurant) {
+      // Create restaurant
+      const restaurantResponse = await axios.post(`${process.env.API_GATEWAY_URL}/ms_rests`, {
+        name: restaurantName,
+        description: restaurantDescription,
+        phone: restaurantPhone,
+        email: restaurantEmail,
+        address: restaurantAddress
+      });
+
+      const restaurantId = restaurantResponse.data.restaurant_id;
+      console.log(`Restaurant created with ID: ${restaurantId}`);
+
+      if (!restaurantId) {
+        console.error('Failed to create restaurant, restaurant ID is undefined');
+        return res.status(500).json({ error: 'Failed to create restaurant' });
+      }
+
+      // Create worker (user-restaurant relationship)
+      const workerResponse = await axios.post(`${process.env.API_GATEWAY_URL}/ms_storage/workers`, {
+        user_id: userId,
+        restaurant_id: restaurantId
+      });
+
+      console.log(`Worker created: User ID: ${userId}, Restaurant ID: ${restaurantId}`);
+
+      res.status(201).json({ user_id: userId, restaurant_id: restaurantId, worker_id: workerResponse.data.worker_id });
+    } else {
+      res.status(201).json({ user_id: userId });
+    }
   } catch (error) {
     console.error('Error during registration:', error);
-    res.status(500).json({ error: 'Registration failed', details: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    // Récupérer l'utilisateur à partir du microservice users
     const response = await axios.get(`${process.env.API_GATEWAY_URL}/ms_users`, {
       params: { email }
     });
 
     const user = response.data[0];
-    console.log("User data: ", user);
 
     if (!user || !user.password) {
       return res.status(401).json({ error: 'Authentication failed' });
     }
 
-    // Comparer les mots de passe
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: 'Authentication failed' });
     }
 
-    // Générer un token JWT
+    if (!user.status) {
+      return res.status(403).json({ error: 'User account is inactive' });
+    }
+
     const accessToken = jwt.sign(
       { user_id: user.user_id, role: user.role },
       process.env.JWT_SECRET,

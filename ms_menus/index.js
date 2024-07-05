@@ -1,20 +1,28 @@
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const connectDB = require('./config/config');
+const menuRoutes = require('./routes/menu'); 
 
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 3006;
 
 app.use(bodyParser.json());
+app.use(cors());
 
-// Connect to MongoDB
+// Middleware pour journaliser les requêtes
+app.use((req, res, next) => {
+  console.log(`Received request: ${req.method} ${req.originalUrl}`);
+  console.log(`Request body: ${JSON.stringify(req.body)}`);
+  next();
+});
+
 connectDB();
 
-// Routes
-app.use('/ms_menus', require('./routes/menu'));
+app.use('/api/ms_menus', menuRoutes); 
 
-// Error handling middleware
+// Middleware pour gérer les erreurs
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).send({ error: err.message });

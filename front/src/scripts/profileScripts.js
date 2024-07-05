@@ -31,17 +31,18 @@ export const saveUserData = async (userData) => {
 
 export const logout = () => {
   localStorage.clear();
+  window.location.href = '/';
 };
+
 
 export const deleteUserAccount = async (password) => {
   try {
     const token = localStorage.getItem('accessToken');
-    const userId = localStorage.getItem('user_id'); // Assurez-vous que 'user_id' est correct
-    await axios.delete(`http://localhost:3010/api/ms_users/${userId}`, {
+    const userId = localStorage.getItem('user_id');
+    await axios.put(`http://localhost:3010/api/ms_users/${userId}/status`, { status: false }, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      data: { password },
     });
     localStorage.clear();
   } catch (error) {
@@ -49,6 +50,7 @@ export const deleteUserAccount = async (password) => {
     throw error;
   }
 };
+
 
 export const changeUserPassword = async (oldPassword, newPassword) => {
   try {

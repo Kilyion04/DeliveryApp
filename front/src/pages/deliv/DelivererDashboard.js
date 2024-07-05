@@ -1,9 +1,57 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getOrders, updateOrder } from '../../scripts/deliv/getOrders'; // Assurez-vous que `updateOrder` est importé
 import '../../style/deliv/dashboard.css';
 
 const DelivererDashboard = () => {
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = {
+    user_id: localStorage.getItem('user_id'),
+    username: localStorage.getItem('username'),
+    email: localStorage.getItem('email'),
+    role: localStorage.getItem('role'),
+    telephone: localStorage.getItem('telephone'),
+    address: localStorage.getItem('address')
+  };
+
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const ordersData = await getOrders();
+        setOrders(ordersData);
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  const handleAccept = async (order) => {
+    try {
+      await updateOrder(order._id, {
+        delivery_person_name: user.username,
+        delivery_person_id: user.user_id,
+        delivery_status: 'Accepted'
+      });
+      setOrders(orders.filter(o => o._id !== order._id));
+    } catch (error) {
+      console.error('Error accepting order:', error);
+    }
+  };
+
+  const handleReject = async (order) => {
+    try {
+      await updateOrder(order._id, {
+        delivery_person_ids_refuse: user.user_id,
+        delivery_status: 'Rejected'
+      });
+      setOrders(orders.filter(o => o._id !== order._id));
+    } catch (error) {
+      console.error('Error rejecting order:', error);
+    }
+  };
 
   return (
     <div className="dashboard-container">
@@ -14,9 +62,15 @@ const DelivererDashboard = () => {
         <div className="left-panel">
           <h2>Livraisons disponibles</h2>
           <ul>
-            <li><Link to="/deliverer/delivery/1">Livraison 1</Link></li>
-            <li><Link to="/deliverer/delivery/2">Livraison 2</Link></li>
-            <li><Link to="/deliverer/delivery/3">Livraison 3</Link></li>
+            {orders.map(order => (
+              <li key={order._id}>
+                <Link to={`/deliv/delivery/${order._id}`}>
+                  {order.restaurant_name} - {order.restaurant_address}
+                </Link>
+                <button onClick={() => handleAccept(order)}>Accepter</button>
+                <button onClick={() => handleReject(order)}>Refuser</button>
+              </li>
+            ))}
           </ul>
         </div>
         <div className="right-panel">
@@ -24,7 +78,10 @@ const DelivererDashboard = () => {
             <h2>Profil</h2>
             <p>Nom: {user.username}</p>
             <p>Email: {user.email}</p>
-            <Link to="/deliverer/profile">Voir le profil</Link>
+            <p>Rôle: {user.role}</p>
+            <p>Téléphone: {user.telephone}</p>
+            <p>Adresse: {user.address}</p>
+            <Link to="/deliv/profile">Voir le profil</Link>
           </div>
           <div className="recent-deliveries">
             <h2>Dernières livraisons</h2>

@@ -48,23 +48,23 @@ const OrderSchema = new Schema({
   },
   delivery_person_name: {
     type: String,
-    required: true
+    default: ''
   },
   delivery_person_id: {
     type: Number,
-    required: true
+    default: 0
   },
   delivery_person_ids_refuse: {
     type: String,
-    required: true
+    default: ''
   },
   delivery_date: {
     type: Date,
-    required: true
+    default: null
   },
   qr_code: {
     type: String,
-    required: true
+    default: ''
   }
 });
 

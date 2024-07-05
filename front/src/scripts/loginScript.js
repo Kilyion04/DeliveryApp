@@ -1,5 +1,4 @@
 import { login } from '../handlers/loginHandler';
-import { useNavigate } from 'react-router-dom';
 
 const handleLogin = async (event, navigate) => {
     event.preventDefault();
@@ -12,11 +11,11 @@ const handleLogin = async (event, navigate) => {
     try {
         const user = await login(userData);
         alert('Login successful');
-        if (user.role === 'client') {
+        if (user.role === 'Client') {
             navigate('/cli/dashboard');
-        } else if (user.role === 'deliverer') {
+        } else if (user.role === 'Livreur') {
             navigate('/deliv/dashboard');
-        } else if (user.role === 'restaurateur') {
+        } else if (user.role === 'Restaurateur') {
             navigate('/rest/dashboard');
         }
     } catch (error) {

@@ -91,6 +91,7 @@ const ClientProfilePage = () => {
                   <AddressAutocomplete
                     value={userData.address}
                     onChange={(value) => setUserData({ ...userData, address: value })}
+                    className="profile-autocomplete-input"
                   />
                 ) : (
                   <input

@@ -1,9 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { handleRegister } from '../../scripts/registerScript';
 import '../../style/connection/register.css';
+import AddressAutocomplete from '../../components/autocompleteAdress'; // Adjust the path as necessary
 
 const RegisterPage = () => {
+  const [userAddress, setUserAddress] = useState('');
+  const [restaurantAddress, setRestaurantAddress] = useState('');
+  const [showRestaurantQuestion, setShowRestaurantQuestion] = useState(false);
+  const [showRestaurantFields, setShowRestaurantFields] = useState(false);
+
+  const handleRoleChange = (event) => {
+    if (event.target.value === 'Restaurateur') {
+      setShowRestaurantQuestion(true);
+    } else {
+      setShowRestaurantQuestion(false);
+      setShowRestaurantFields(false);
+    }
+  };
+
+  const handleRestaurantCheckboxChange = (event) => {
+    setShowRestaurantFields(event.target.checked);
+  };
+
   return (
     <div className="register-container">
       <h1>Register</h1>
@@ -25,49 +44,49 @@ const RegisterPage = () => {
           <input type="password" name="password" required />
         </div>
         <div className="form-group">
+          <label>Adresse</label>
+          <AddressAutocomplete value={userAddress} onChange={setUserAddress} />
+          <input type="hidden" name="address" value={userAddress} />
+        </div>
+        <div className="form-group">
           <label>Rôle</label>
-          <select name="role" required>
+          <select name="role" required onChange={handleRoleChange}>
             <option value="Client">Client</option>
             <option value="Livreur">Livreur</option>
             <option value="Restaurateur">Restaurateur</option>
           </select>
         </div>
-        <div className="form-group">
-          <label>Numéro de rue</label>
-          <input type="text" name="address_num" required />
-        </div>
-        <div className="form-group">
-          <label>Complément d'adresse</label>
-          <input type="text" name="address_complement" />
-        </div>
-        <div className="form-group">
-          <label>Rue</label>
-          <input type="text" name="address_street" required />
-        </div>
-        <div className="form-group">
-          <label>Quartier</label>
-          <input type="text" name="address_neighbor" />
-        </div>
-        <div className="form-group">
-          <label>Ville</label>
-          <input type="text" name="address_city" required />
-        </div>
-        <div className="form-group">
-          <label>Code postal</label>
-          <input type="text" name="address_postal_code" required />
-        </div>
-        <div className="form-group">
-          <label>Département</label>
-          <input type="text" name="address_departement" required />
-        </div>
-        <div className="form-group">
-          <label>Région</label>
-          <input type="text" name="address_region" required />
-        </div>
-        <div className="form-group">
-          <label>Pays</label>
-          <input type="text" name="address_country" required />
-        </div>
+        {showRestaurantQuestion && (
+          <div className="form-group">
+            <label>Souhaitez-vous créer un restaurant ?</label>
+            <input type="checkbox" name="createRestaurant" onChange={handleRestaurantCheckboxChange} />
+          </div>
+        )}
+        {showRestaurantFields && (
+          <div className="restaurant-fields">
+            <div className="form-group">
+              <label>Nom du Restaurant</label>
+              <input type="text" name="restaurantName" />
+            </div>
+            <div className="form-group">
+              <label>Description du Restaurant</label>
+              <textarea name="restaurantDescription"></textarea>
+            </div>
+            <div className="form-group">
+              <label>Téléphone du Restaurant</label>
+              <input type="text" name="restaurantPhone" />
+            </div>
+            <div className="form-group">
+              <label>Email du Restaurant</label>
+              <input type="email" name="restaurantEmail" />
+            </div>
+            <div className="form-group">
+              <label>Adresse du Restaurant</label>
+              <AddressAutocomplete value={restaurantAddress} onChange={setRestaurantAddress} />
+              <input type="hidden" name="restaurantAddress" value={restaurantAddress} />
+            </div>
+          </div>
+        )}
         <button type="submit" className="register-button">Créer un compte</button>
       </form>
       <div className="links">

@@ -1,25 +1,26 @@
-// index.js
-import express from 'express';
-import dotenv from 'dotenv';
-import connectDB from './address/config/config.js';
-import addressRoutes from './address/routes/address.js';
-
-// Charger les variables d'environnement
-dotenv.config();
-
-// Connexion à la base de données
-connectDB();
+require('dotenv').config();
+const express = require('express');
+const bodyParser = require('body-parser');
+const { connectDB } = require('./config/config'); // Assurez-vous que le chemin est correct
+const workerRoutes = require('./routes/routeWorker');
 
 const app = express();
+const port = process.env.PORT || 3009;
 
-// Middleware pour parser le corps des requêtes JSON
-app.use(express.json());
+app.use(bodyParser.json());
 
-// Utilisation des routes d'adresse
-app.use('/api/addresses', addressRoutes);
+// Connect to PostgreSQL
+connectDB();
 
-// Démarrage du serveur
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+// Routes
+app.use('/api/ms_storage', workerRoutes);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err);
+    res.status(500).send({ error: err.message });
+});
+
+app.listen(port, () => {
+    console.log(`User-Restaurant service running on port ${port}`);
 });

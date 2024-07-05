@@ -19,7 +19,7 @@ const MenuSchema = new Schema({
     required: true
   },
   article_list: {
-    type: String,
+    type: [String],
     required: true
   }
 });

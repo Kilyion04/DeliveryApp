@@ -1,69 +1,68 @@
 const Restaurant = require('../models/modelRestaurant');
-const Address = require('../models/modelAddress');
-const { sequelize } = require('../config/config');
 
-exports.createRestaurant = async (req, res) => {
-  const transaction = await sequelize.transaction();
+exports.getAllRestaurants = async (req, res) => {
   try {
-    const {
-      user_id,
-      name,
-      description,
-      phone,
-      email,
-      address_num,
-      address_complement,
-      address_street,
-      address_neighbor,
-      address_city,
-      address_postal_code,
-      address_departement,
-      address_region,
-      address_country
-    } = req.body;
-
-    // Create address
-    const address = await Address.create({
-      address_num,
-      address_complement,
-      address_street,
-      address_neighbor,
-      address_city,
-      address_postal_code,
-      address_departement,
-      address_region,
-      address_country
-    }, { transaction });
-
-    // Create restaurant
-    const restaurant = await Restaurant.create({
-      user_id,
-      name,
-      description,
-      phone,
-      email,
-      address_id: address.address_id
-    }, { transaction });
-
-    await transaction.commit();
-    res.status(201).json({ restaurant, address });
+    const restaurants = await Restaurant.findAll();
+    res.json(restaurants);
   } catch (err) {
-    await transaction.rollback();
     res.status(500).send(err);
   }
 };
 
-exports.getRestaurantsByUser = async (req, res) => {
+exports.getRestaurantById = async (req, res) => {
   try {
-    const userId = req.params.user_id;
-    const restaurants = await Restaurant.findAll({
-      where: { user_id: userId },
-      include: Address
-    });
-    if (!restaurants.length) {
-      return res.status(404).send({ message: 'No restaurants found for this user' });
+    const restaurant = await Restaurant.findByPk(req.params.id);
+    if (!restaurant) {
+      return res.status(404).send({ message: 'Restaurant not found' });
     }
-    res.json(restaurants);
+    res.json(restaurant);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
+exports.createRestaurant = async (req, res) => {
+  try {
+    const { name, description, phone, email, address } = req.body;
+
+    const newRestaurant = await Restaurant.create({
+      name,
+      description,
+      phone,
+      email,
+      address
+    });
+
+    res.status(201).json({ restaurant_id: newRestaurant.restaurant_id, restaurant: newRestaurant.dataValues });
+  } catch (err) {
+    console.error('Error creating restaurant:', err);
+    res.status(400).json({ error: 'Failed to create restaurant', details: err.message });
+  }
+};
+
+exports.updateRestaurant = async (req, res) => {
+  try {
+    const restaurant = await Restaurant.findByPk(req.params.id);
+    if (!restaurant) {
+      return res.status(404).send({ message: 'Restaurant not found' });
+    }
+
+    const updatedRestaurant = await restaurant.update(req.body);
+    res.json(updatedRestaurant);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+};
+
+exports.deleteRestaurant = async (req, res) => {
+  try {
+    const restaurant = await Restaurant.findByPk(req.params.id);
+    if (!restaurant) {
+      return res.status(404).send({ message: 'Restaurant not found' });
+    }
+
+    await restaurant.destroy();
+    res.send({ message: 'Restaurant deleted' });
   } catch (err) {
     res.status(500).send(err);
   }

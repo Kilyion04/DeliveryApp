@@ -15,14 +15,13 @@ const ClientDashboard = () => {
       role: localStorage.getItem('role'),
       telephone: localStorage.getItem('telephone'),
       address: localStorage.getItem('address'),
-      city: localStorage.getItem('city'), // Assurez-vous que 'city' est récupéré
     };
     setUser(userData);
   }, []);
 
   useEffect(() => {
-    if (user && user.city) {
-      axios.get(`http://localhost:3006/ms_rests/city/${user.city}`)
+    if (user) {
+      axios.get(`http://localhost:3010/api/ms_rests`)
         .then(response => setRestaurants(response.data))
         .catch(error => console.error('Error fetching restaurants:', error));
     }
@@ -35,7 +34,8 @@ const ClientDashboard = () => {
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
-        <h1>Nom de l'App</h1>
+        <h1>Bienvenu sur kilydelivery</h1>
+        <h1>{user.username}</h1>
       </header>
       <div className="dashboard-content">
         <div className="left-panel">
@@ -44,6 +44,7 @@ const ClientDashboard = () => {
             {restaurants.map((restaurant) => (
               <li key={restaurant.restaurant_id}>
                 <Link to={`/client/restaurant/${restaurant.restaurant_id}`}>{restaurant.name}</Link>
+                <p>{restaurant.address}</p>
               </li>
             ))}
           </ul>
@@ -61,7 +62,6 @@ const ClientDashboard = () => {
               <li>Commande 1 - En cours</li>
               <li>Commande 2 - Livrée</li>
               <li>Commande 3 - Annulée</li>
-              {/* Ajoutez plus de commandes ici */}
             </ul>
           </div>
         </div>
